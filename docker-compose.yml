@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  melichallenge.api:
+    image: ${DOCKER_REGISTRY-}melichallengeapi
+    build:
+      context: .
+      dockerfile: MeLiChallenge.Api/Dockerfile
+  postgres_image:
+    image: postgres
+    ports: 
+      - "5432"
+    restart: always
+    volumes: 
+      - db_volume:/var/lib/postgresql/data
+      - ./dbscripts/seed.sql :/docker-entrypoint-initdb.d/seed.sql
+    environment:
+      POSTGRES_USER: "meliuser"
+      POSTGRES_PASSWORD: "melipassword"
+      POSTGRES_DB: "melidb"
+
+volumes:
+  db_volume:
