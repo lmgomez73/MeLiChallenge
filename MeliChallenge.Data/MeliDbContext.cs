@@ -13,7 +13,10 @@ namespace MeliChallenge.Data
         public MeliDbContext(DbContextOptions<MeliDbContext> options) : base(options)
         { 
         }
-            DbSet<Satellite> Satellites { get; set; }
+        public DbSet<Satellite> Satellites { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageItem> MessageItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
