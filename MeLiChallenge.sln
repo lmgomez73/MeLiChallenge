@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeliChallenge.Test", "MeliC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeliChallenge.Data", "MeliChallenge.Data\MeliChallenge.Data.csproj", "{1946D2CF-8D6B-4FE6-939D-1B5702AAB7BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeLiChallenge.Bussiness", "MeLiChallenge.Bussiness\MeLiChallenge.Bussiness.csproj", "{EB0D0ABB-85D0-4008-B91D-28A5AB5D98E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeLiChallenge.Business", "MeLiChallenge.Bussiness\MeLiChallenge.Business.csproj", "{EB0D0ABB-85D0-4008-B91D-28A5AB5D98E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeLiChallenge.Model", "MeLiChallenge.Model\MeLiChallenge.Model.csproj", "{9BA6E705-6B09-4DC1-AA5C-304FE93C81E3}"
 EndProject
