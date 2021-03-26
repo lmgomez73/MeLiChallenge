@@ -12,6 +12,7 @@ namespace MeLiChallenge.Model
 
         public Satellite Satellite { get; set; }
         public string[] Phrases { get; set; }
+        public double Distance { get; set; }
 
     }
 }

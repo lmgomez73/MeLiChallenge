@@ -13,6 +13,10 @@ namespace MeliChallenge.Data
         public MeliDbContext(DbContextOptions<MeliDbContext> options) : base(options)
         { 
         }
+        public MeliDbContext()
+        {
+
+        }
         public DbSet<Satellite> Satellites { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageItem> MessageItems { get; set; }
@@ -33,7 +37,8 @@ namespace MeliChallenge.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                
+
+                optionsBuilder.UseNpgsql("User ID=meliuser;Password=melipassword;Host=localhost;Port=5432;Database=melidb;");
             }
         }
     }

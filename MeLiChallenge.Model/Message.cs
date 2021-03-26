@@ -15,6 +15,8 @@ namespace MeLiChallenge.Model
         public List<MessageItem> MessageItems { get; set; }
         public string MessageResult { get; set; }
         public DateTime ReceivedTime { get; set; }
+        public double MessagePositionX { get; set; }
+        public double MessagePositionY { get; set; }
 
     }
 }

@@ -3,16 +3,127 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using MeLiChallenge.Model;
+using MeliChallenge.Data;
+using MeLiChallenge.Model.DTO;
+using Microsoft.EntityFrameworkCore;
+using MeLiChallenge.Business.Helper;
 
 namespace MeLiChallenge.Business
 {
     public class MessageService
     {
+        #region Public Methods
+
+        public void AddMessage(TopSecretRequestDTO message)
+        {
+            TrilaterationHelper helper = new TrilaterationHelper();
+            Message msg = new Message();
+            using (var context = new MeliDbContext())
+            {
+                msg.MessageItems = message.Satellites.Select(x => new MessageItem
+                {
+                    Phrases = x.Message,
+                    Satellite = context.Satellites.First(s => s.Name.Equals(x.Name))
+                }).ToList();
+            }
+            msg.ReceivedTime = DateTime.Now;
+            msg.MessageResult = DecodeMessage(msg);
+
+            Point position = GetPosition(msg);
+            msg.MessagePositionX = position.X;
+            msg.MessagePositionY = position.Y;
+
+            using (var context = new MeliDbContext())
+            {
+
+                context.Messages.Add(msg);
+                context.SaveChanges();
+            }
+        }
+
+
+
+        public void AddMessageBySatellite(TopSecretSplitRequestDTO message, string satelliteName)
+        {
+            Message msg;
+            using (var context = new MeliDbContext())
+            {
+                msg = context.Messages.Include("MessageItems").OrderByDescending(m => m.ReceivedTime).First();
+                if (msg.MessageItems.Count == 3)
+                {
+                    msg = new Message();
+                }
+                else if (msg.MessageItems.Any(m => m.Satellite.Name.Equals(satelliteName)))
+                {
+                    throw new Exception("There is already a message from satellite " + satelliteName);
+                }
+
+                var newMsg = new MessageItem
+                {
+                    Phrases = message.Message,
+                    Satellite = context.Satellites.First(s => s.Name.Equals(satelliteName))
+                };
+                msg.MessageItems.Add(newMsg);
+                msg.ReceivedTime = DateTime.Now;
+                context.Messages.Add(msg);
+                context.SaveChanges();
+            }
+        }
+
+        public TopSecretResponseDTO GetLastMessage()
+        {
+            Message msg;
+            TopSecretResponseDTO response = new TopSecretResponseDTO();
+            using (var context = new MeliDbContext())
+            {
+                msg = context.Messages.Include("MessageItems").OrderByDescending(m => m.ReceivedTime).First();
+                if (msg.MessageItems.Count==3)
+                {
+                    msg.MessageResult = DecodeMessage(msg);
+                    Point position = GetPosition(msg);
+                    msg.MessagePositionX = position.X;
+                    msg.MessagePositionY = position.Y;
+                    context.SaveChanges();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Insufficient information");
+                }
+            }
+            response.Position = new Point { X = msg.MessagePositionX, Y = msg.MessagePositionY };
+            response.Message = msg.MessageResult;
+
+            return response;
+        }
+
+
         public string DecodeMessage(Message messages)
         {
             string result = "";
             var words = GetMessageWords(messages);
             result = GetOrderedMessage(messages, words);
+            return result;
+        }
+
+        #endregion
+
+
+        #region Private Methods
+        private Point GetPosition(Message msg)
+        {
+            TrilaterationHelper helper = new TrilaterationHelper();
+            var points = msg.MessageItems.Select(s => new
+            {
+                Point = new Point
+                {
+                    X = s.Satellite.PositionX,
+                    Y = s.Satellite.PositionY
+                },
+                Distance = s.Distance
+            }).ToArray();
+            var result = helper.GetBidimensionalTrilateration(points[0].Point, points[1].Point, points[2].Point,
+                points[0].Distance, points[1].Distance, points[2].Distance);
+
             return result;
         }
 
@@ -99,7 +210,7 @@ namespace MeLiChallenge.Business
 
             return string.Join(' ', resultArray);
         }
-
+        #endregion
 
     }
 }
