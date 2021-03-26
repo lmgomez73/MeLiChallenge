@@ -1,4 +1,7 @@
 using MeliChallenge.Data;
+using MeLiChallenge.Business;
+using MeLiChallenge.Business.Helper;
+using MeLiChallenge.Business.Interface;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,7 +31,10 @@ namespace MeLiChallenge.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton<ITrilaterationHelper, TrilaterationHelper>();
+            services.AddScoped<IMessageService, MessageService>();
             services.AddDbContext<MeliDbContext>(options => {
+
             options.UseNpgsql(Configuration.GetConnectionString("MeliDb"));
         });
         }

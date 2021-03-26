@@ -7,38 +7,53 @@ using MeliChallenge.Data;
 using MeLiChallenge.Model.DTO;
 using Microsoft.EntityFrameworkCore;
 using MeLiChallenge.Business.Helper;
+using MeLiChallenge.Business.Interface;
+using Microsoft.Extensions.Logging;
 
 namespace MeLiChallenge.Business
 {
-    public class MessageService
+    public class MessageService : IMessageService
     {
+
+        ITrilaterationHelper _helper;
+        //MeliDbContext _Context;
+        public MessageService(ITrilaterationHelper helper)
+        {
+            _helper = helper;
+            //_Context = context;
+        }
+
         #region Public Methods
 
-        public void AddMessage(TopSecretRequestDTO message)
+        public TopSecretResponseDTO AddMessage(TopSecretRequestDTO message)
         {
             TrilaterationHelper helper = new TrilaterationHelper();
+            TopSecretResponseDTO response = new TopSecretResponseDTO();
             Message msg = new Message();
             using (var context = new MeliDbContext())
             {
                 msg.MessageItems = message.Satellites.Select(x => new MessageItem
                 {
                     Phrases = x.Message,
-                    Satellite = context.Satellites.First(s => s.Name.Equals(x.Name))
+                    Satellite = context.Satellites.First(s => s.Name.Equals(x.Name)),
+                    Distance = x.Distance
                 }).ToList();
-            }
-            msg.ReceivedTime = DateTime.Now;
-            msg.MessageResult = DecodeMessage(msg);
 
-            Point position = GetPosition(msg);
-            msg.MessagePositionX = position.X;
-            msg.MessagePositionY = position.Y;
+                msg.ReceivedTime = DateTime.Now;
+                msg.MessageResult = DecodeMessage(msg);
 
-            using (var context = new MeliDbContext())
-            {
+                Point position = GetPosition(msg);
+                msg.MessagePositionX = position.X;
+                msg.MessagePositionY = position.Y;
+
+
 
                 context.Messages.Add(msg);
                 context.SaveChanges();
             }
+            response.Position = new Point { X = msg.MessagePositionX, Y = msg.MessagePositionY };
+            response.Message = msg.MessageResult;
+            return response;
         }
 
 
@@ -77,7 +92,7 @@ namespace MeLiChallenge.Business
             using (var context = new MeliDbContext())
             {
                 msg = context.Messages.Include("MessageItems").OrderByDescending(m => m.ReceivedTime).First();
-                if (msg.MessageItems.Count==3)
+                if (msg.MessageItems.Count == 3)
                 {
                     msg.MessageResult = DecodeMessage(msg);
                     Point position = GetPosition(msg);
@@ -97,21 +112,23 @@ namespace MeLiChallenge.Business
         }
 
 
-        public string DecodeMessage(Message messages)
+
+
+        #endregion
+
+
+        #region Private Methods
+
+
+        private string DecodeMessage(Message messages)
         {
             string result = "";
             var words = GetMessageWords(messages);
             result = GetOrderedMessage(messages, words);
             return result;
         }
-
-        #endregion
-
-
-        #region Private Methods
         private Point GetPosition(Message msg)
         {
-            TrilaterationHelper helper = new TrilaterationHelper();
             var points = msg.MessageItems.Select(s => new
             {
                 Point = new Point
@@ -121,7 +138,7 @@ namespace MeLiChallenge.Business
                 },
                 Distance = s.Distance
             }).ToArray();
-            var result = helper.GetBidimensionalTrilateration(points[0].Point, points[1].Point, points[2].Point,
+            var result = _helper.GetBidimensionalTrilateration(points[0].Point, points[1].Point, points[2].Point,
                 points[0].Distance, points[1].Distance, points[2].Distance);
 
             return result;

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using MeLiChallenge.Model;
+using MeLiChallenge.Business.Interface;
 
 namespace MeLiChallenge.Business.Helper
 {
     //Based on http://repositoriodigital.uns.edu.ar/bitstream/123456789/4671/3/La%20matem%C3%A1tica%20detr%C3%A1s%20del%20GPS.pdf
-    public class TrilaterationHelper
+    public class TrilaterationHelper : ITrilaterationHelper
     {
 
         public Point GetBidimensionalTrilateration(Point p1, Point p2, Point p3, double distance1, double distance2, double distance3)
@@ -76,7 +77,7 @@ namespace MeLiChallenge.Business.Helper
 
 
         // using d(P0,P1) = sqrt((x1 −x0)^2 + (y1 −y0)^2) formula
-        public double GetDistanceFromTwoPoints(Point p1, Point p2)
+        private double GetDistanceFromTwoPoints(Point p1, Point p2)
         {
             double result;
             //getting information to use in formula
@@ -91,7 +92,7 @@ namespace MeLiChallenge.Business.Helper
             return result;
         }
 
-        public Point[] GetIntersectionBetweenTwoPoints(Point p1, Point p2, double distance1, double distance2)
+        private Point[] GetIntersectionBetweenTwoPoints(Point p1, Point p2, double distance1, double distance2)
         {
 
             Point[] result = new Point[]

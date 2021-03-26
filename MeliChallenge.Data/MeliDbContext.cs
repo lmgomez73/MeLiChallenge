@@ -38,7 +38,7 @@ namespace MeliChallenge.Data
             if (!optionsBuilder.IsConfigured)
             {
 
-                optionsBuilder.UseNpgsql("User ID=meliuser;Password=melipassword;Host=localhost;Port=5432;Database=melidb;");
+                optionsBuilder.UseNpgsql("User ID=meliuser;Password=melipassword;Host=host.docker.internal;Port=5432;Database=melidb;");
             }
         }
     }
